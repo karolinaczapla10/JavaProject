@@ -16,7 +16,7 @@ function Navbar() {
     return (
         <nav>
             <ul>
-                {!isAuthenticated && <li><Link to="/">App</Link></li>}
+                {!isAuthenticated && <li><Link to="/">Users Management Page </Link></li>}
                 {isAuthenticated && <li><Link to="/profile">Profile</Link></li>}
                 {isAuthenticated && <li><Link to="/notes">Your Notes</Link></li>} {/* Added Notes link */}
                 {isAdmin && <li><Link to="/admin/user-management">User Management</Link></li>}
@@ -27,3 +27,5 @@ function Navbar() {
 }
 
 export default Navbar;
+
+

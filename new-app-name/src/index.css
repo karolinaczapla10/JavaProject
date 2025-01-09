@@ -13,7 +13,7 @@
   }
   
   nav {
-  background-color: #333;
+  background-color: #2d5f2f;
   padding: 10px 0;
   padding: 20px;
   font-size: 20px;
@@ -93,7 +93,7 @@
   display: block;
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #4CAF50;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -161,14 +161,14 @@
   padding: 10px 20px;
   border: none;
   border-radius: 3px;
-  background-color: #007bff;
+  background-color: #4CAF50;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
   }
   
   button[type="submit"]:hover {
-  background-color: #0056b3;
+  background-color: #4CAF50;
   }
   
   
@@ -184,9 +184,7 @@
   width: 100%;
   }
   
-  
-  
-  
+
   
   
   /* PAGE NOT FOUND STYLING */
@@ -262,7 +260,7 @@
   
   button {
   padding: 10px;
-  background-color: #007bff;
+  background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 4px;
@@ -275,7 +273,7 @@
   }
   
   button:hover {
-  background-color: #0056b3;
+  background-color: #4CAF50;
   }
   
   .delete-button {
@@ -314,12 +312,95 @@
   margin-right: 10px;
   border: none;
   border-radius: 3px;
-  background-color: #007bff;
+  background-color: #4CAF50;
   color: #fff;
   font-size: 16px;
   cursor: pointer;
   }
   
   .profile-page-container button:hover {
-  background-color: #093c72;
+  background-color: #4CAF50;
   }
+
+  .notes-list-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notes-list-container h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+.new-note-container {
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 800px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+textarea {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 8px 15px;
+  margin: 5px;
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.notes-container {
+  margin-top: 20px;
+}
+
+.note-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.note-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.note-actions button {
+  background-color: #f44336;
+}
+
+.note-actions button:hover {
+  background-color: #e53935;
+}
+
+.note-content {
+  margin-bottom: 10px;
+}

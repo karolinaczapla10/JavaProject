@@ -15,13 +15,13 @@ function App() {
     const [isAdmin, setIsAdmin] = useState(UserService.adminOnly());
 
     useEffect(() => {
-        // Aktualizacja stanu po zalogowaniu/wylogowaniu
+        // Update authentication status on mount
         const updateAuthStatus = () => {
             setIsAuthenticated(UserService.isAuthenticated());
             setIsAdmin(UserService.adminOnly());
         };
 
-        window.addEventListener('authChange', updateAuthStatus); // Nasłuchiwanie zmian autoryzacji
+        window.addEventListener('authChange', updateAuthStatus); // Listen to auth changes
 
         return () => {
             window.removeEventListener('authChange', updateAuthStatus); 
@@ -31,15 +31,20 @@ function App() {
     return (
         <BrowserRouter>
             <div className="App">
-                <Navbar />
+                {/* Render Navbar only if authenticated */}
+                {isAuthenticated && <Navbar />}
+                
                 <div className="content">
                     <Routes>
-                        <Route exact path="/" element={<LoginPage />} />
-                        <Route exact path="/login" element={<LoginPage />} />
+                        {/* Redirect authenticated users to profile */}
+                        <Route exact path="/" element={isAuthenticated ? <Navigate to="/profile" /> : <LoginPage />} />
+                        <Route exact path="/login" element={isAuthenticated ? <Navigate to="/profile" /> : <LoginPage />} />
 
+                        {/* Protected Routes */}
                         {isAuthenticated && <Route path="/profile" element={<ProfilePage />} />}
                         {isAuthenticated && <Route path="/notes" element={<NotesList />} />}
 
+                        {/* Admin Routes */}
                         {isAdmin && (
                             <>
                                 <Route path="/register" element={<RegistrationPage />} />
@@ -47,9 +52,12 @@ function App() {
                                 <Route path="/update-user/:userId" element={<UpdateUser />} />
                             </>
                         )}
+
+                        {/* Catch-all Route to redirect to login */}
                         <Route path="*" element={<Navigate to="/login" />} />
                     </Routes>
                 </div>
+
                 <FooterComponent />
             </div>
         </BrowserRouter>

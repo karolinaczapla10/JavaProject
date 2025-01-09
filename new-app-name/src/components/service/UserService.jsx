@@ -13,6 +13,15 @@ class UserService{
         }
     }
 
+    static async checkEmailExists(email) {
+        try {
+            const response = await axios.get(`${UserService.BASE_URL}/auth/check-email`, { params: { email } });
+            return response.data; // true if email exists, false otherwise
+        } catch (err) {
+            throw err;
+        }
+    }
+    
     static async register(userData, token){
         try{
             const response = await axios.post(`${UserService.BASE_URL}/auth/register`, userData, 

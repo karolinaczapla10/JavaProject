@@ -1,6 +1,7 @@
 package com.karolinaczapla.usermanagementsystem.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 
@@ -12,6 +13,7 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "Content cannot be empty")
     private String content;
 
     @ManyToOne(fetch = FetchType.EAGER)  // Załaduj użytkownika razem z notatką

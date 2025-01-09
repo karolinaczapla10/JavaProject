@@ -38,6 +38,7 @@ public class NoteService {
         String email = jwtUtils.extractUsername(jwtToken);
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        System.out.println("Content:" + newContent);
 
         Note note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new RuntimeException("Note not found"));

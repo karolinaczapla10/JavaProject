@@ -1,14 +1,16 @@
 package com.karolinaczapla.usermanagementsystem.service;
+
 import com.karolinaczapla.usermanagementsystem.dto.RequestResponse;
 import com.karolinaczapla.usermanagementsystem.entity.Users;
 import com.karolinaczapla.usermanagementsystem.repository.UsersRepository;
-import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +27,29 @@ public class UsersManagementService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
-    public RequestResponse register(RequestResponse registrationRequest){
+    public boolean checkEmailExists(String email) {
+        return usersRepository.existsByEmail(email);
+    }
+    public RequestResponse register(@Valid RequestResponse registrationRequest, BindingResult result) {
         RequestResponse resp = new RequestResponse();
+
+        if (usersRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
+            result.rejectValue("email", "email.exists", "Email is already registered");
+        }
+
+        if (!"USER".equals(registrationRequest.getRole()) && !"ADMIN".equals(registrationRequest.getRole())) {
+            result.rejectValue("role", "role.invalid", "Role must be either USER or ADMIN");
+        }
+
+        if (registrationRequest.getPassword() != null && registrationRequest.getPassword().length() < 3) {
+            result.rejectValue("password", "password.short", "Password must be at least 3 characters long");
+        }
+
+        if (result.hasErrors()) {
+            resp.setStatusCode(400);
+            resp.setError(result.getAllErrors().toString());
+            return resp;
+        }
 
         try {
             Users ourUser = new Users();
@@ -37,14 +59,14 @@ public class UsersManagementService {
             ourUser.setName(registrationRequest.getName());
             ourUser.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
             Users ourUsersResult = usersRepository.save(ourUser);
-            if (ourUsersResult.getId()>0) {
-                resp.setOurUsers((ourUsersResult));
+            if (ourUsersResult.getId() > 0) {
+                resp.setOurUsers(ourUsersResult);
                 resp.setMessage("User Saved Successfully");
                 resp.setStatusCode(200);
             }
-
-        }catch (Exception e){
+        } catch (Exception e) {
             resp.setStatusCode(500);
+            resp.setMessage("User Not Saved ");
             resp.setError(e.getMessage());
         }
         return resp;
@@ -154,8 +176,31 @@ public class UsersManagementService {
         return reqRes;
     }
 
-    public RequestResponse updateUser(Integer userId, Users updatedUser) {
+    public RequestResponse updateUser(Integer userId, @Valid Users updatedUser, BindingResult result) {
         RequestResponse reqRes = new RequestResponse();
+
+
+        // Ręczna walidacja roli
+        if (!"USER".equals(updatedUser.getRole()) && !"ADMIN".equals(updatedUser.getRole())) {
+            result.rejectValue("role", "role.invalid", "Role must be either USER or ADMIN");
+        }
+
+        // Ręczna walidacja hasła (minimum 3 znaki)
+        if (updatedUser.getPassword() != null && updatedUser.getPassword().length() < 3) {
+            result.rejectValue("password", "password.short", "Password must be at least 3 characters long");
+        }
+        if (updatedUser.getEmail() != null) {
+            Optional<Users> existingUserWithEmail = usersRepository.findByEmail(updatedUser.getEmail());
+            if (existingUserWithEmail.isPresent() && !existingUserWithEmail.get().getId().equals(userId)) {
+                result.rejectValue("email", "email.used", "Email is already in use by another user");
+            }
+        }
+        if (result.hasErrors()) {
+            reqRes.setStatusCode(400);
+            reqRes.setError(result.getAllErrors().toString());
+            return reqRes;
+        }
+
         try {
             Optional<Users> userOptional = usersRepository.findById(userId);
             if (userOptional.isPresent()) {
@@ -165,9 +210,7 @@ public class UsersManagementService {
                 existingUser.setCity(updatedUser.getCity());
                 existingUser.setRole(updatedUser.getRole());
 
-                // Check if password is present in the request
                 if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-                    // Encode the password and update it
                     existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
                 }
 

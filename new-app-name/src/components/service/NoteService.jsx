@@ -7,6 +7,8 @@ const NoteService = {
         return axios.post(`${API_URL}/create`, content, {
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'  // Dodaj Content-Type
+
             }
         });
     },
@@ -23,6 +25,8 @@ const NoteService = {
         return axios.delete(`${API_URL}/delete/${noteId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'  // Dodaj Content-Type
+
             }
         });
     },
@@ -30,6 +34,8 @@ const NoteService = {
         return axios.get(`${API_URL}/all`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'  // Dodaj Content-Type
+
             }
         });
     },

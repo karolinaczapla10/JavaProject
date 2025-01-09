@@ -1,29 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NoteService from '../service/NoteService'; // Import the NoteService
+import NoteService from '../service/NoteService';
 
 function NotesList() {
     const [notes, setNotes] = useState([]);
     const [error, setError] = useState('');
     const [newNoteContent, setNewNoteContent] = useState('');
+    const [editingNoteId, setEditingNoteId] = useState(null);
+    const [editingNoteContent, setEditingNoteContent] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchNotes = async () => {
             try {
                 const token = localStorage.getItem('token');
-                console.log('Token:', token);  // Log the token
-
-                // If no token, redirect to login
                 if (!token) {
                     navigate('/login');
                     return;
                 }
-
-                // Use NoteService to fetch notes
                 const response = await NoteService.getAllNotes(token);
-
-                // Extract notes from the response
                 setNotes(response.data);
             } catch (error) {
                 console.error('Error fetching notes:', error);
@@ -34,9 +29,8 @@ function NotesList() {
         fetchNotes();
     }, [navigate]);
 
-    // Handle creating a new note
     const handleCreateNote = async () => {
-        if (!newNoteContent.trim()) { // Walidacja pustego pola
+        if (!newNoteContent.trim()) {
             setError('Note content cannot be empty.');
             return;
         }
@@ -46,17 +40,16 @@ function NotesList() {
                 navigate('/login');
                 return;
             }
-
-            const response = await NoteService.createNote(newNoteContent, token);
-            setNotes([response.data, ...notes]);  // Prepend the new note
-            setNewNoteContent(''); // Clear the input field
+            const contentWithoutQuotes = newNoteContent.replace(/"/g, ''); // Remove quotes
+            const response = await NoteService.createNote(contentWithoutQuotes, token);
+            setNotes([response.data, ...notes]);
+            setNewNoteContent('');
         } catch (error) {
             console.error('Error creating note:', error);
             setError('Error creating note');
         }
     };
 
-    // Handle deleting a note
     const handleDeleteNote = async (noteId) => {
         try {
             const token = localStorage.getItem('token');
@@ -64,39 +57,42 @@ function NotesList() {
                 navigate('/login');
                 return;
             }
-
             await NoteService.deleteNote(noteId, token);
-            setNotes(notes.filter(note => note.id !== noteId));  // Remove the deleted note
+            setNotes(notes.filter(note => note.id !== noteId));
         } catch (error) {
             console.error('Error deleting note:', error);
             setError('Error deleting note');
         }
     };
 
-    // Handle updating a note
-    const handleUpdateNote = async (noteId, newContent) => {
+    const startEditing = (noteId, currentContent) => {
+        setEditingNoteId(noteId);
+        setEditingNoteContent(currentContent);
+    };
+
+    const handleUpdateNote = async (noteId) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
                 navigate('/login');
                 return;
             }
-    
-            const response = await NoteService.updateNote(noteId, { content: newContent }, token);
-            setNotes(notes.map(note => note.id === noteId ? response.data : note));  // Update the note
+            const contentWithoutQuotes = editingNoteContent.replace(/"/g, ''); // Remove quotes
+            const response = await NoteService.updateNote(noteId, contentWithoutQuotes, token);
+            setNotes(notes.map(note => note.id === noteId ? response.data : note));
+            setEditingNoteId(null);
+            setEditingNoteContent('');
         } catch (error) {
             console.error('Error updating note:', error);
             setError('Error updating note');
         }
     };
-    
 
     return (
         <div className="notes-list-container">
             <h2>Notes</h2>
             {error && <p className="error-message">{error}</p>}
 
-            {/* Create a new note */}
             <div className="new-note-container">
                 <textarea
                     value={newNoteContent}
@@ -105,31 +101,36 @@ function NotesList() {
                 />
                 <button onClick={handleCreateNote}>Create Note</button>
             </div>
-
-            <ul>
+            
+            <div className="notes-container">
                 {notes.map(note => (
-                    <li key={note.id}>
+                <div key={note.id} className="note-item">
+                    <div className="note-content">
+                    {editingNoteId === note.id ? (
+                        <textarea
+                        value={editingNoteContent}
+                        onChange={(e) => setEditingNoteContent(e.target.value)}
+                        />
+                    ) : (
+                        <p>{note.content.replace(/"/g, '')}</p>
+                    )}
+                    </div>
+                    <div className="note-actions">
+                    {editingNoteId === note.id ? (
                         <div>
-                            <p>{note.content}</p>
-                            <small>By: {note.user.name}</small>
-                            <div className="note-actions">
-                                {/* Update button */}
-                                <button onClick={() => {
-                                    const newContent = prompt('Edit note content:', note.content);
-                                    if (newContent) {
-                                        handleUpdateNote(note.id, newContent);
-                                    }
-                                }}>
-                                    Edit
-                                </button>
-
-                                {/* Delete button */}
-                                <button onClick={() => handleDeleteNote(note.id)}>Delete</button>
-                            </div>
+                        <button onClick={() => handleUpdateNote(note.id)}>Save</button>
+                        <button onClick={() => setEditingNoteId(null)}>Cancel</button>
                         </div>
-                    </li>
+                    ) : (
+                        <div>
+                        <button onClick={() => startEditing(note.id, note.content)}>Edit</button>
+                        <button onClick={() => handleDeleteNote(note.id)}>Delete</button>
+                        </div>
+                    )}
+                    </div>
+                </div>
                 ))}
-            </ul>
+            </div>
         </div>
     );
 }

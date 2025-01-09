@@ -7,16 +7,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 public class UserManagementController {
     @Autowired
     private UsersManagementService usersManagementService;
 
+    @GetMapping("/auth/check-email")
+    public ResponseEntity<Boolean> checkEmailExists(@RequestParam String email) {
+        boolean emailExists = usersManagementService.checkEmailExists(email);
+        return ResponseEntity.ok(emailExists);
+    }
     @PostMapping("/auth/register")
-    public ResponseEntity<RequestResponse> regeister(@RequestBody RequestResponse reg){
-        return ResponseEntity.ok(usersManagementService.register(reg));
+    public ResponseEntity<RequestResponse> register(@Valid @RequestBody RequestResponse reg, BindingResult result) {
+        return ResponseEntity.ok(usersManagementService.register(reg, result));
     }
 
     @PostMapping("/auth/login")
@@ -41,8 +49,8 @@ public class UserManagementController {
     }
 
     @PutMapping("/admin/update/{userId}")
-    public ResponseEntity<RequestResponse> updateUser(@PathVariable Integer userId, @RequestBody Users reqres){
-        return ResponseEntity.ok(usersManagementService.updateUser(userId, reqres));
+    public ResponseEntity<RequestResponse> updateUser(@PathVariable Integer userId, @Valid @RequestBody Users reqres, BindingResult result) {
+        return ResponseEntity.ok(usersManagementService.updateUser(userId, reqres, result));
     }
 
     @GetMapping("/adminuser/get-profile")
